@@ -8,21 +8,55 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  password  String
-  firstName String
-  lastName  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  wallet    Wallet?
+  id           String        @id @default(cuid())
+  email        String        @unique
+  password     String
+  firstName    String
+  lastName     String
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  wallet       Wallet?
+  cards        Card[]
+  transactions Transaction[] @relation("UserTransactions") // Define relation name
 }
 
 model Wallet {
   id        String   @id @default(cuid())
   balance   Float    @default(0)
+  currency  String   @default("USD")
   userId    String   @unique
   user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Card {
+  id             String        @id @default(cuid())
+  type           String
+  status         String
+  name           String
+  cardNumber     String        @unique
+  expirationDate DateTime
+  cvv            String
+  limit          Float
+  userId         String
+  user           User          @relation(fields: [userId], references: [id])
+  transactions   Transaction[]
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+}
+
+model Transaction {
+  id        String   @id @default(cuid())
+  amount    Float
+  currency  String
+  merchant  String
+  status    String
+  timestamp DateTime
+  cardId    String
+  card      Card     @relation(fields: [cardId], references: [id])
+  userId    String
+  user      User     @relation("UserTransactions", fields: [userId], references: [id]) // Match relation name
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

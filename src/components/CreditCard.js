@@ -102,7 +102,7 @@ const CreditCard = ({
         <div className="relative z-10 p-6 h-full">
           {/* Logo */}
           <div className="absolute top-6 right-6">
-            <LogoIcon />
+            {/* <LogoIcon /> */}
           </div>
 
           {/* Card Type */}

@@ -1,6 +1,6 @@
 import { ChevronRight, Shield, Wallet, Zap } from "lucide-react";
 import Link from "next/link";
-import CreditCard from "../components/creditcard";
+import CreditCard from "../components/CreditCard";
 
 export default function LandingPage() {
   return (

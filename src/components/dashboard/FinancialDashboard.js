@@ -1,5 +1,11 @@
-import React, { useState } from "react";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
+import React, { useState, useEffect } from "react";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   LayoutDashboard,
@@ -14,49 +20,142 @@ import {
   ArrowDownCircle,
   ArrowUpCircle,
   Search,
+  Loader2,
 } from "lucide-react";
 
 const FinancialDashboard = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [walletData, setWalletData] = useState(null);
+  const [cards, setCards] = useState([]);
+  const [transactions, setTransactions] = useState([]);
+  const [showDepositModal, setShowDepositModal] = useState(false);
+  const [depositAmount, setDepositAmount] = useState("");
 
-  const sidebarItems = [
-    {
-      icon: <LayoutDashboard size={20} />,
-      label: "Dashboard",
-      id: "dashboard",
-    },
-    { icon: <CreditCard size={20} />, label: "Virtual Cards", id: "cards" },
-    { icon: <Wallet size={20} />, label: "Wallet", id: "wallet" },
-    { icon: <Building size={20} />, label: "Bank Accounts", id: "banks" },
-    { icon: <FileText size={20} />, label: "Statements", id: "statements" },
-    {
-      icon: <DollarSign size={20} />,
-      label: "Transactions",
-      id: "transactions",
-    },
-  ];
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
 
-  const virtualCards = [
-    { id: 1, type: "Visa", lastFour: "4242", limit: 5000, balance: 1250 },
-    { id: 2, type: "Mastercard", lastFour: "8888", limit: 3000, balance: 500 },
-  ];
+  const fetchDashboardData = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
 
-  const transactions = [
-    {
-      icon: <ArrowUpCircle className="text-green-500" size={20} />,
-      title: "Deposit from Bank",
-      amount: "+$2,500.00",
-      date: "2024-11-26",
-      status: "completed",
-    },
-    {
-      icon: <ArrowDownCircle className="text-red-500" size={20} />,
-      title: "Withdrawal to Chase",
-      amount: "-$1,800.00",
-      date: "2024-11-25",
-      status: "pending",
-    },
-  ];
+      // Get token from localStorage
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("No authentication token found");
+      }
+
+      // Fetch wallet data
+      const walletResponse = await fetch("/api/wallet", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const walletResult = await walletResponse.json();
+      if (!walletResponse.ok) throw new Error(walletResult.error);
+      setWalletData(walletResult.wallet);
+
+      // Fetch cards
+      const cardsResponse = await fetch("/api/cards", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const cardsResult = await cardsResponse.json();
+      if (!cardsResponse.ok) throw new Error(cardsResult.error);
+      setCards(cardsResult.cards);
+
+      // Fetch recent transactions
+      const transactionsResponse = await fetch("/api/transactions?limit=5", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const transactionsResult = await transactionsResponse.json();
+      if (!transactionsResponse.ok) throw new Error(transactionsResult.error);
+      setTransactions(transactionsResult.transactions);
+    } catch (err) {
+      setError(err.message);
+      console.error("Error fetching dashboard data:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDeposit = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const amount = parseFloat(depositAmount);
+
+      if (isNaN(amount) || amount <= 0) {
+        throw new Error("Please enter a valid amount");
+      }
+
+      const response = await fetch("/api/wallet", {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          amount,
+          type: "deposit",
+        }),
+      });
+
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error);
+
+      setWalletData(result.wallet);
+      setShowDepositModal(false);
+      setDepositAmount("");
+      fetchDashboardData(); // Refresh all data
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+    }).format(amount);
+  };
+
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-black">
+        <Loader2 className="h-8 w-8 animate-spin text-yellow-500" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-black">
+        <Card className="bg-zinc-900 border-zinc-800 max-w-md w-full mx-4">
+          <CardContent className="p-6">
+            <div className="text-center">
+              <div className="text-red-500 mb-4">Error loading dashboard</div>
+              <div className="text-zinc-400 mb-4">{error}</div>
+              <Button onClick={fetchDashboardData}>Retry</Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen bg-black text-zinc-200">
@@ -67,7 +166,34 @@ const FinancialDashboard = () => {
         </div>
 
         <nav className="flex-1">
-          {sidebarItems.map((item) => (
+          {[
+            {
+              icon: <LayoutDashboard size={20} />,
+              label: "Dashboard",
+              id: "dashboard",
+            },
+            {
+              icon: <CreditCard size={20} />,
+              label: "Virtual Cards",
+              id: "cards",
+            },
+            { icon: <Wallet size={20} />, label: "Wallet", id: "wallet" },
+            {
+              icon: <Building size={20} />,
+              label: "Bank Accounts",
+              id: "banks",
+            },
+            {
+              icon: <FileText size={20} />,
+              label: "Statements",
+              id: "statements",
+            },
+            {
+              icon: <DollarSign size={20} />,
+              label: "Transactions",
+              id: "transactions",
+            },
+          ].map((item) => (
             <div
               key={item.id}
               onClick={() => setActiveTab(item.id)}
@@ -84,19 +210,17 @@ const FinancialDashboard = () => {
         </nav>
 
         <div className="border-t border-zinc-800 pt-4 mt-auto">
-          <div className="flex items-center space-x-3 p-3">
-            <div className="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center text-black font-bold">
-              U
-            </div>
-            <div>
-              <div className="text-sm">user@example.com</div>
-              <div className="text-xs text-yellow-500">Premium Account</div>
-            </div>
-          </div>
-          <div className="flex items-center space-x-2 p-3 cursor-pointer hover:bg-zinc-800 rounded-lg">
-            <LogOut size={20} />
-            <span>Logout</span>
-          </div>
+          <Button
+            variant="ghost"
+            className="w-full justify-start"
+            onClick={() => {
+              localStorage.removeItem("token");
+              window.location.href = "/";
+            }}
+          >
+            <LogOut className="mr-2" size={20} />
+            Logout
+          </Button>
         </div>
       </div>
 
@@ -106,42 +230,33 @@ const FinancialDashboard = () => {
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-2xl font-bold text-zinc-200">Welcome back</h2>
           <div className="flex space-x-4">
-            <Button className="bg-yellow-500 hover:bg-yellow-600 text-black">
-              <PlusCircle className="mr-2" size={20} />
-              New Virtual Card
+            <Button
+              onClick={() => setShowDepositModal(true)}
+              className="bg-yellow-500 hover:bg-yellow-600 text-black"
+            >
+              <DollarSign className="mr-2" size={20} />
+              Add Funds
             </Button>
             <Button className="bg-zinc-800 hover:bg-zinc-700">
-              <Building className="mr-2" size={20} />
-              Connect Bank
+              <PlusCircle className="mr-2" size={20} />
+              New Card
             </Button>
           </div>
         </div>
 
         {/* Main Dashboard Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Balance Card */}
+          {/* Wallet Balance Card */}
           <Card className="bg-zinc-900 border-zinc-800">
             <CardContent className="p-6">
               <div className="mb-4">
-                <h3 className="text-lg text-zinc-400">Total Balance</h3>
+                <h3 className="text-lg text-zinc-400">Wallet Balance</h3>
                 <div className="text-3xl font-bold text-yellow-500">
-                  $150,000.00
+                  {formatCurrency(walletData?.balance || 0)}
                 </div>
               </div>
-
-              <div className="flex justify-between text-sm text-zinc-400">
-                <div>
-                  <div>Available Credit</div>
-                  <div className="text-zinc-200">$847,500.00</div>
-                </div>
-                <div>
-                  <div>Credit Limit</div>
-                  <div className="text-zinc-200">$1,000,000.00</div>
-                </div>
-              </div>
-
-              <div className="w-full bg-zinc-800 rounded-full h-2 my-4">
-                <div className="bg-yellow-500 h-2 rounded-full w-2/12" />
+              <div className="text-sm text-zinc-400">
+                {walletData?.currency || "USD"} Account
               </div>
             </CardContent>
           </Card>
@@ -153,14 +268,14 @@ const FinancialDashboard = () => {
                 <h3 className="text-lg text-zinc-400">Virtual Cards</h3>
                 <Button
                   variant="outline"
-                  className="text-yellow-500 border-yellow-500 hover:bg-yellow-500 hover:text-black"
+                  className="text-yellow-500 border-yellow-500"
                 >
                   View All
                 </Button>
               </div>
 
               <div className="space-y-4">
-                {virtualCards.map((card) => (
+                {cards.map((card) => (
                   <div
                     key={card.id}
                     className="p-4 bg-zinc-800 rounded-lg flex justify-between items-center"
@@ -169,15 +284,13 @@ const FinancialDashboard = () => {
                       <CreditCard className="text-yellow-500" size={24} />
                       <div>
                         <div className="text-sm text-zinc-400">
-                          {card.type} ****{card.lastFour}
+                          {card.type} ****{card.cardNumber.slice(-4)}
                         </div>
-                        <div className="text-yellow-500">
-                          ${card.balance.toLocaleString()}
-                        </div>
+                        <div className="text-yellow-500">{card.name}</div>
                       </div>
                     </div>
                     <div className="text-sm text-zinc-400">
-                      Limit: ${card.limit.toLocaleString()}
+                      Limit: {formatCurrency(card.limit)}
                     </div>
                   </div>
                 ))}
@@ -202,32 +315,40 @@ const FinancialDashboard = () => {
                       placeholder="Search transactions..."
                     />
                   </div>
-                  <Button
-                    variant="outline"
-                    className="text-yellow-500 border-yellow-500 hover:bg-yellow-500 hover:text-black"
-                  >
-                    Export
-                  </Button>
                 </div>
               </div>
 
               <div className="space-y-2">
-                {transactions.map((transaction, index) => (
+                {transactions.map((transaction) => (
                   <div
-                    key={index}
+                    key={transaction.id}
                     className="flex items-center justify-between p-4 bg-zinc-800/50 rounded-lg hover:bg-zinc-800"
                   >
                     <div className="flex items-center space-x-4">
-                      {transaction.icon}
+                      {transaction.amount > 0 ? (
+                        <ArrowUpCircle className="text-green-500" size={20} />
+                      ) : (
+                        <ArrowDownCircle className="text-red-500" size={20} />
+                      )}
                       <div>
-                        <div className="text-zinc-300">{transaction.title}</div>
+                        <div className="text-zinc-300">
+                          {transaction.merchant}
+                        </div>
                         <div className="text-sm text-zinc-400">
-                          {transaction.date}
+                          {formatDate(transaction.timestamp)}
                         </div>
                       </div>
                     </div>
                     <div className="flex items-center space-x-4">
-                      <div className="text-zinc-300">{transaction.amount}</div>
+                      <div
+                        className={
+                          transaction.amount > 0
+                            ? "text-green-500"
+                            : "text-red-500"
+                        }
+                      >
+                        {formatCurrency(transaction.amount)}
+                      </div>
                       <span
                         className={`px-2 py-1 rounded text-xs ${
                           transaction.status === "completed"
@@ -237,13 +358,6 @@ const FinancialDashboard = () => {
                       >
                         {transaction.status}
                       </span>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="text-zinc-400 hover:text-zinc-300"
-                      >
-                        <MoreVertical size={20} />
-                      </Button>
                     </div>
                   </div>
                 ))}
@@ -252,6 +366,48 @@ const FinancialDashboard = () => {
           </Card>
         </div>
       </div>
+
+      {/* Deposit Modal */}
+      {showDepositModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
+          <Card className="bg-zinc-900 border-zinc-800 w-full max-w-md mx-4">
+            <CardHeader>
+              <CardTitle>Add Funds</CardTitle>
+              <CardDescription>
+                Enter the amount you want to deposit
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm text-zinc-400">Amount</label>
+                  <input
+                    type="number"
+                    value={depositAmount}
+                    onChange={(e) => setDepositAmount(e.target.value)}
+                    className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-2 mt-1"
+                    placeholder="Enter amount"
+                    min="0"
+                    step="0.01"
+                  />
+                </div>
+                <div className="flex space-x-4">
+                  <Button className="flex-1" onClick={handleDeposit}>
+                    Deposit
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => setShowDepositModal(false)}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 };
