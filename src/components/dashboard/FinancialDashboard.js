@@ -24,7 +24,7 @@ export default function FinancialDashboard() {
     <div className="flex-1 p-4 md:p-8">
       {/* Desktop Header - Hidden on mobile */}
       <div className="hidden md:block">
-        <h2 className="text-2xl font-bold text-zinc-200 mb-8">Dashboard</h2>
+      <DashboardHeader onDeposit={() => setShowDepositModal(true)} />
       </div>
 
       {/* Mobile Header */}
