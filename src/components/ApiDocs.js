@@ -285,15 +285,15 @@ const ApiDocs = () => {
         </div>
 
         <div className="grid gap-8">
-          {endpoints.map((category) => (
-            <section key={category.category} className="space-y-6">
+          {endpoints.map((category, k) => (
+            <section key={k} className="space-y-6">
               <h2 className="text-2xl font-bold text-zinc-200">
                 {category.category}
               </h2>
               <div className="grid gap-6">
-                {category.endpoints.map((endpoint) => (
+                {category.endpoints.map((endpoint, index) => (
                   <Card
-                    key={endpoint.path}
+                    key={index}
                     className="bg-zinc-900 border-zinc-800"
                   >
                     <CardHeader>

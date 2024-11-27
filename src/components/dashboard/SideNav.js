@@ -23,7 +23,7 @@ export default function SideNav({ isMobile, onClose }) {
     },
     {
       icon: <CreditCard size={20} />,
-      label: "Virtual Cards",
+      label: "Create Cards",
       href: "/dashboard/cards",
     },
     {
@@ -36,16 +36,16 @@ export default function SideNav({ isMobile, onClose }) {
       label: "Transactions",
       href: "/dashboard/transactions",
     },
-    {
-      icon: <Building size={20} />,
-      label: "Bank Accounts",
-      href: "/dashboard/banks",
-    },
-    {
-      icon: <FileText size={20} />,
-      label: "Statements",
-      href: "/dashboard/statements",
-    },
+    // {
+    //   icon: <Building size={20} />,
+    //   label: "Bank Accounts",
+    //   href: "/dashboard/banks",
+    // },
+    // {
+    //   icon: <FileText size={20} />,
+    //   label: "Statements",
+    //   href: "/dashboard/statements",
+    // },
   ];
 
   return (
