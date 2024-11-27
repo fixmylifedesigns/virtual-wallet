@@ -1,48 +1,14 @@
 import { ChevronRight, Shield, Wallet, Zap } from "lucide-react";
 import Link from "next/link";
 import CreditCard from "../components/CreditCard";
+import Nav from "@/components/MarketingPage/Nav";
+import Footer from "@/components/MarketingPage/Footer";
 
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-black text-zinc-200">
       {/* Navigation */}
-      <nav className="border-b border-zinc-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex-shrink-0">
-              <span className="text-2xl font-bold text-yellow-500">
-                VirtualWallet
-              </span>
-            </div>
-            <div className="hidden md:flex space-x-8 items-center">
-              <Link
-                href="#features"
-                className="text-zinc-400 hover:text-yellow-500"
-              >
-                Features
-              </Link>
-              <Link
-                href="#security"
-                className="text-zinc-400 hover:text-yellow-500"
-              >
-                Security
-              </Link>
-              <Link
-                href="#pricing"
-                className="text-zinc-400 hover:text-yellow-500"
-              >
-                Pricing
-              </Link>
-              <Link
-                href="/auth"
-                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-black bg-yellow-500 hover:bg-yellow-400"
-              >
-                Get Started
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <Nav />
 
       {/* Hero Section */}
       <div className="relative overflow-hidden">
@@ -50,12 +16,12 @@ export default function LandingPage() {
           {/* Hero Content */}
           <div className="text-center space-y-8 relative z-10">
             <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight">
-              <span className="block text-zinc-200">Create Virtual Cards</span>
-              <span className="block text-yellow-500">in Seconds</span>
+              <span className="block text-zinc-200">Create Virtual Cards at</span>
+              <span className="block text-yellow-500">Lightning Speed!</span>
             </h1>
             <p className="mt-6 text-xl md:text-2xl max-w-2xl mx-auto text-zinc-400">
               Generate secure, temporary virtual cards for your online
-              purchases. Take control of your digital payments with unlimited
+              purchases within seconds. Take control of your digital payments with unlimited
               virtual cards.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4 mt-8">
@@ -164,63 +130,7 @@ export default function LandingPage() {
           </div>
         </div>
       </div>
-
-      {/* Footer */}
-      <footer className="bg-black border-t border-zinc-800">
-        <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
-            <div>
-              <h3 className="text-sm font-semibold text-yellow-500 tracking-wider uppercase">
-                Product
-              </h3>
-              <ul className="mt-4 space-y-4">
-                <li>
-                  <a href="#" className="text-zinc-400 hover:text-yellow-500">
-                    Features
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-zinc-400 hover:text-yellow-500">
-                    Security
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-zinc-400 hover:text-yellow-500">
-                    Pricing
-                  </a>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-sm font-semibold text-yellow-500 tracking-wider uppercase">
-                Company
-              </h3>
-              <ul className="mt-4 space-y-4">
-                <li>
-                  <a href="#" className="text-zinc-400 hover:text-yellow-500">
-                    About
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-zinc-400 hover:text-yellow-500">
-                    Blog
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-zinc-400 hover:text-yellow-500">
-                    Contact
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </div>
-          <div className="mt-8 border-t border-zinc-800 pt-8">
-            <p className="text-base text-zinc-400">
-              &copy; 2024 VirtualWallet. All rights reserved.
-            </p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

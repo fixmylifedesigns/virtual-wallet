@@ -1,10 +1,22 @@
 -- CreateTable
+CREATE TABLE "Web3Auth" (
+    "id" TEXT NOT NULL,
+    "address" TEXT NOT NULL,
+    "nonce" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Web3Auth_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "User" (
     "id" TEXT NOT NULL,
     "email" TEXT NOT NULL,
-    "password" TEXT NOT NULL,
+    "password" TEXT,
     "firstName" TEXT NOT NULL,
     "lastName" TEXT NOT NULL,
+    "walletAddress" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -29,10 +41,12 @@ CREATE TABLE "Card" (
     "type" TEXT NOT NULL,
     "status" TEXT NOT NULL,
     "name" TEXT NOT NULL,
+    "cardHolder" TEXT NOT NULL,
     "cardNumber" TEXT NOT NULL,
     "expirationDate" TIMESTAMP(3) NOT NULL,
     "cvv" TEXT NOT NULL,
     "limit" DOUBLE PRECISION NOT NULL,
+    "variant" TEXT NOT NULL DEFAULT 'black',
     "userId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -57,7 +71,13 @@ CREATE TABLE "Transaction" (
 );
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Web3Auth_address_key" ON "Web3Auth"("address");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "User_walletAddress_key" ON "User"("walletAddress");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Wallet_userId_key" ON "Wallet"("userId");

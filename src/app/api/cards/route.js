@@ -7,7 +7,11 @@ import { z } from "zod";
 const cardSchema = z.object({
   type: z.enum(["virtual", "physical"]),
   name: z.string().min(1),
+  cardHolder: z.string().min(1).max(20),
   limit: z.number().positive(),
+  variant: z
+    .enum(["black", "blue", "purple", "golden", "yellow"])
+    .default("black"),
 });
 
 export async function POST(req) {
@@ -38,7 +42,9 @@ export async function POST(req) {
       data: {
         type: result.data.type,
         name: result.data.name,
+        cardHolder: result.data.cardHolder.toUpperCase(),
         limit: result.data.limit,
+        variant: result.data.variant,
         cardNumber,
         cvv,
         expirationDate,
@@ -49,6 +55,7 @@ export async function POST(req) {
 
     return NextResponse.json({ card });
   } catch (error) {
+    console.error("Card creation error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
