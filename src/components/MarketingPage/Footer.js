@@ -11,7 +11,10 @@ export default function Footer() {
             </h3>
             <ul className="mt-4 space-y-4">
               <li>
-                <Link href="/#features" className="text-zinc-400 hover:text-yellow-500">
+                <Link
+                  href="/#features"
+                  className="text-zinc-400 hover:text-yellow-500"
+                >
                   Features
                 </Link>
               </li>
@@ -21,6 +24,14 @@ export default function Footer() {
                   className="text-zinc-400 hover:text-yellow-500"
                 >
                   Security
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/docs/api"
+                  className="text-zinc-400 hover:text-yellow-500"
+                >
+                  API Documentation
                 </Link>
               </li>
               <li>

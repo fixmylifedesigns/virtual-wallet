@@ -4,6 +4,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import CreditCard from "@/components/CreditCard";
 import { useRouter } from "next/navigation";
+import DashboardLayout from "@/components/dashboard/DashboardLayout";
 
 export default function CreateVirtualCard() {
   const router = useRouter();
@@ -34,17 +35,26 @@ export default function CreateVirtualCard() {
       const token = localStorage.getItem("token");
       if (!token) throw new Error("Not authenticated");
 
+      // Transform the data to match the API schema
+      const cardData = {
+        type: "virtual", // API expects lowercase "virtual"
+        name: formData.name,
+        cardHolder: formData.cardHolder.toUpperCase(),
+        limit: Number(formData.limit), // Ensure limit is a number
+        variant: formData.variant,
+      };
+
       const response = await fetch("/api/cards", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(cardData),
       });
 
+      const data = await response.json();
       if (!response.ok) {
-        const data = await response.json();
         throw new Error(data.error || "Failed to create card");
       }
 
